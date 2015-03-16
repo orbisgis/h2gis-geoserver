@@ -1,0 +1,127 @@
+/*
+ * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
+ * that brings spatial support to the H2 Java database.
+ *
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
+ * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
+ *
+ * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
+ *
+ * h2gis-gs  is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * h2gis-gs  is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * h2spatial. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * For more information, please consult: <http://www.orbisgis.org/>
+ * or contact directly:
+ * info_at_ orbisgis.org
+ */
+package org.orbisgis.geoserver.h2gis.datastore;
+
+import com.vividsolutions.jts.geom.Geometry;
+import java.io.IOException;
+import org.geotools.data.jdbc.FilterToSQL;
+import org.geotools.filter.FilterCapabilities;
+import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.Function;
+import org.opengis.filter.expression.Literal;
+import org.opengis.filter.expression.PropertyName;
+import org.opengis.filter.spatial.BinarySpatialOperator;
+
+/**
+ *
+ * @author Erwan Bocher
+ * @source $URL$
+ */
+public class H2GISFilterToSQL extends FilterToSQL {
+
+    H2GISFilterToSQLHelper helper;
+    private boolean functionEncodingEnabled;
+
+    public H2GISFilterToSQL(H2GISDialect dialect) {
+        helper = new H2GISFilterToSQLHelper(this);
+    }
+
+    public boolean isLooseBBOXEnabled() {
+        return helper.looseBBOXEnabled;
+    }
+
+    public void setLooseBBOXEnabled(boolean looseBBOXEnabled) {
+        helper.looseBBOXEnabled = looseBBOXEnabled;
+    }
+
+    @Override
+    protected void visitLiteralGeometry(Literal expression) throws IOException {
+        // evaluate the literal and store it for later
+        Geometry geom = (Geometry) evaluateLiteral(expression, Geometry.class);
+        out.write("ST_GeomFromText('");
+        out.write(geom.toText());
+        if (currentSRID == null && currentGeometry != null) {
+        // if we don't know at all, use the srid of the geometry we're comparing against
+        // (much slower since that has to be extracted record by record as opposed to
+        // being a constant)
+            out.write("', ST_SRID(\"" + currentGeometry.getLocalName() + "\"))");
+        } else {
+            out.write("', " + currentSRID + ")");
+        }
+    }
+
+    @Override
+    protected FilterCapabilities createFilterCapabilities() {
+        return helper.createFilterCapabilities(functionEncodingEnabled);
+    }
+
+    @Override
+    protected Object visitBinarySpatialOperator(BinarySpatialOperator filter,
+            PropertyName property, Literal geometry, boolean swapped,
+            Object extraData) {
+        helper.out = out;
+        return helper.visitBinarySpatialOperator(filter, property, geometry,
+                swapped, extraData);
+    }
+
+    @Override
+    protected Object visitBinarySpatialOperator(BinarySpatialOperator filter, Expression e1,
+            Expression e2, Object extraData) {
+        helper.out = out;
+        return helper.visitBinarySpatialOperator(filter, e1, e2, extraData);
+    }   
+
+    @Override
+    public Object visit(Function function, Object extraData) throws RuntimeException {
+        helper.out = out;
+        try {
+            encodingFunction = true;
+            boolean encoded = helper.visitFunction(function, extraData);
+            encodingFunction = false;
+            if (encoded) {
+                return extraData;
+            } else {
+                return super.visit(function, extraData);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected String getFunctionName(Function function) {
+        return helper.getFunctionName(function);
+    }
+
+    @Override
+    protected String cast(String encodedProperty, Class target) throws IOException {
+        return helper.cast(encodedProperty, target);
+    }
+
+    public void setFunctionEncodingEnabled(boolean functionEncodingEnabled) {
+        this.functionEncodingEnabled = functionEncodingEnabled;
+    }
+}
