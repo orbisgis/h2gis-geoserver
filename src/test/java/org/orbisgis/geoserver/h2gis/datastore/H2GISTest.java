@@ -25,13 +25,15 @@
  */
 package org.orbisgis.geoserver.h2gis.datastore;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import org.geotools.data.Query;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.JTS;
@@ -42,7 +44,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 
 /**
@@ -88,15 +89,8 @@ public class H2GISTest extends H2GISDBTestSetUp{
         assertEquals("POINT (12 0)",rs.getString(2) );
         rs.close();        
         st.execute("DROP TABLE h2gis.geomtable");
-    }
+    }   
     
-    @Test
-    public void findTables() throws SQLException, IOException {
-        List<Name> names = ds.getNames();
-        for (Name name : names) {
-
-        }
-    }    
     
     @Test
     public void getFeatureSchema() throws SQLException, IOException {
@@ -135,6 +129,34 @@ public class H2GISTest extends H2GISDBTestSetUp{
         }        
         assertTrue(JTS.toEnvelope(wKTReader.read("POLYGON((0 0,10 0,10 10, 0 10, 0 0))")).boundsEquals2D(bounds, 0.01));
                 
+        st.execute("drop table FORESTS");
+    }
+    
+    
+    @Test
+    public void getFeatures() throws SQLException, IOException {
+        st.execute("drop table if exists FORESTS");
+        st.execute("CREATE TABLE FORESTS ( FID INTEGER, NAME CHARACTER VARYING(64),"
+                + " THE_GEOM MULTIPOLYGON);"
+                + "INSERT INTO FORESTS VALUES(109, 'Green Forest', ST_MPolyFromText( 'MULTIPOLYGON(((28 26,28 0,84 0,"
+                + "84 42,28 26), (52 18,66 23,73 9,48 6,52 18)),((59 18,67 18,67 13,59 13,59 18)))', 101));");
+
+        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("FORESTS");
+        SimpleFeatureCollection features = fs.getFeatures(Filter.INCLUDE);
+        
+        SimpleFeatureIterator iterator = features.features();
+
+        try {
+            while (iterator.hasNext()) {
+                SimpleFeature feature = iterator.next();
+                Geometry geom = (Geometry) feature.getDefaultGeometry();
+                System.out.println("geom "+ geom.toString());
+                
+            }
+        } finally {
+            iterator.close();
+ }
+        
         st.execute("drop table FORESTS");
     }
     

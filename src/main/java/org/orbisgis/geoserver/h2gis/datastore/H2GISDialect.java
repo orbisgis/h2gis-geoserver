@@ -57,6 +57,7 @@ import org.geotools.factory.Hints;
 import org.geotools.jdbc.BasicSQLDialect;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.referencing.CRS;
+import org.h2.value.ValueGeometry;
 import org.h2gis.utilities.SFSUtilities;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -139,7 +140,7 @@ public class H2GISDialect extends BasicSQLDialect {
     public Geometry decodeGeometryValue(GeometryDescriptor descriptor,
             ResultSet rs, String column, GeometryFactory factory, Connection cx)
             throws IOException, SQLException {
-        Geometry geom = (Geometry) rs.getObject(column);
+        Geometry geom = ValueGeometry.get(rs.getBytes(column)).getGeometry();
         if (geom == null) {
             return null;
         }

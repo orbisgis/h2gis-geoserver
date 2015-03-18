@@ -58,6 +58,6 @@ public class H2GISDataStoreFactoryInitializer extends
     
     @Override
     public void initialize(H2GISDataStoreFactory factory) {
-        factory.setBaseDirectory( resourceLoader.getBaseDirectory() );
+        factory.setBaseDirectory(resourceLoader.getBaseDirectory() );
     }
 }
