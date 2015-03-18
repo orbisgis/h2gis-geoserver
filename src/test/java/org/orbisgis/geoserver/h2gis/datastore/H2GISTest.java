@@ -135,29 +135,31 @@ public class H2GISTest extends H2GISDBTestSetUp{
     
     @Test
     public void getFeatures() throws SQLException, IOException {
-        st.execute("drop table if exists FORESTS");
-        st.execute("CREATE TABLE FORESTS ( FID INTEGER, NAME CHARACTER VARYING(64),"
-                + " THE_GEOM MULTIPOLYGON);"
-                + "INSERT INTO FORESTS VALUES(109, 'Green Forest', ST_MPolyFromText( 'MULTIPOLYGON(((28 26,28 0,84 0,"
-                + "84 42,28 26), (52 18,66 23,73 9,48 6,52 18)),((59 18,67 18,67 13,59 13,59 18)))', 101));");
+        st.execute("drop table if exists LANDCOVER");
+        st.execute("CREATE TABLE LANDCOVER ( FID INTEGER, NAME CHARACTER VARYING(64),"
+                + " THE_GEOM POLYGON);"
+                + "INSERT INTO LANDCOVER VALUES(1, 'Green Forest', 'POLYGON((110 330, 210 330, 210 240, 110 240, 110 330))');"
+                + "INSERT INTO LANDCOVER VALUES(2, 'Cereal', 'POLYGON((200 220, 310 220, 310 160, 200 160, 200 220))');"
+                + "INSERT INTO LANDCOVER VALUES(3, 'Building', 'POLYGON((90 130, 140 130, 140 110, 90 110, 90 130))');");
 
-        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("FORESTS");
+        
+        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("LANDCOVER");
         SimpleFeatureCollection features = fs.getFeatures(Filter.INCLUDE);
         
         SimpleFeatureIterator iterator = features.features();
 
+        double area =0;
         try {
             while (iterator.hasNext()) {
                 SimpleFeature feature = iterator.next();
                 Geometry geom = (Geometry) feature.getDefaultGeometry();
-                System.out.println("geom "+ geom.toString());
-                
+                area+=geom.getArea();
             }
         } finally {
             iterator.close();
  }
-        
-        st.execute("drop table FORESTS");
+        assertEquals(16600.0, area, 0.1);
+        st.execute("drop table LANDCOVER");
     }
     
 }
