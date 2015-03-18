@@ -8,7 +8,7 @@
 <beans>
 
   <!-- h2 datastore initialier -->
-  <bean id="h2gisDataStoreFactoryInitializer" class="org.orbisgis.geoserver.h2gis.H2GISDataStoreFactoryInitializer">
+  <bean id="h2gisDataStoreFactoryInitializer" class=" org.orbisgis.geoserver.h2gis.H2GISDataStoreFactoryInitializer">
     <property name="resourceLoader" ref="resourceLoader"/>
   </bean> 
 

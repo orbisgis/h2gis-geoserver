@@ -1,21 +1,31 @@
 /*
- *    GeoTools - The Open Source Java GIS Toolkit
- *    http://geotools.org
+ * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
+ * that brings spatial support to the H2 Java database.
  *
- *    (C) 2002-2008, Open Source Geospatial Foundation (OSGeo)
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
+ * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
  *
- *    This library is free software; you can redistribute it and/or
- *    modify it under the terms of the GNU Lesser General Public
- *    License as published by the Free Software Foundation;
- *    version 2.1 of the License.
+ * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
  *
- *    This library is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *    Lesser General Public License for more details.
+ * h2gis-gs  is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * h2gis-gs  is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * h2gis-gs. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * For more information, please consult: <http://www.orbisgis.org/>
+ * or contact directly:
+ * info_at_ orbisgis.org
  */
 package org.orbisgis.geoserver.h2gis.datastore;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,20 +40,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
+import org.junit.Test;
 
 
 /**
  * 
  *
- * @source $URL$
  */
 public class H2DataStoreFactoryTest  {
     H2GISDataStoreFactory factory;
     HashMap params;
     
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         factory = new H2GISDataStoreFactory();
+        factory.setBaseDirectory(new File("./testH2"));
         params = new HashMap();
         params.put(JDBCDataStoreFactory.NAMESPACE.key, "http://www.geotools.org/test");
         params.put(JDBCDataStoreFactory.DATABASE.key, "h2gis");
@@ -51,17 +62,20 @@ public class H2DataStoreFactoryTest  {
         
     }
 
+    @Test
     public void testCanProcess() throws Exception {
         assertFalse(factory.canProcess(Collections.EMPTY_MAP));
         assertTrue(factory.canProcess(params));
     }
     
+    @Test
     public void testCreateDataStore() throws Exception {
         JDBCDataStore ds = factory.createDataStore( params );
         assertNotNull( ds );
         assertTrue(ds.getDataSource() instanceof ManageableDataSource);
     }
 
+    @Test
     public void testCreateDataStoreMVCC() throws Exception {
         Map clonedParams = new HashMap(params);
         clonedParams.put(H2GISDataStoreFactory.MVCC.key, true);
@@ -78,10 +92,11 @@ public class H2DataStoreFactoryTest  {
         }
     }
 
+    @Test
     public void testTCP() throws Exception {
         HashMap params = new HashMap();
         params.put(H2GISDataStoreFactory.HOST.key, "localhost");
-        params.put(H2GISDataStoreFactory.DATABASE.key, "geotools");
+        params.put(H2GISDataStoreFactory.DATABASE.key, "h2gis_tcp");
         params.put(H2GISDataStoreFactory.USER.key, "h2gis");
         params.put(H2GISDataStoreFactory.PASSWD.key, "h2gis");
         
@@ -105,5 +120,6 @@ public class H2DataStoreFactoryTest  {
         finally {
             server.shutdown();
         }
-    }
+    }   
+ 
 }

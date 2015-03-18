@@ -17,7 +17,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * h2spatial. If not, see <http://www.gnu.org/licenses/>.
+ * h2gis-gs. If not, see <http://www.gnu.org/licenses/>.
  *
  * For more information, please consult: <http://www.orbisgis.org/>
  * or contact directly:
@@ -38,7 +38,6 @@ import org.opengis.filter.spatial.BinarySpatialOperator;
 /**
  *
  * @author Erwan Bocher
- * @source $URL$
  */
 public class H2GISFilterToSQL extends FilterToSQL {
 
@@ -47,15 +46,7 @@ public class H2GISFilterToSQL extends FilterToSQL {
 
     public H2GISFilterToSQL(H2GISDialect dialect) {
         helper = new H2GISFilterToSQLHelper(this);
-    }
-
-    public boolean isLooseBBOXEnabled() {
-        return helper.looseBBOXEnabled;
-    }
-
-    public void setLooseBBOXEnabled(boolean looseBBOXEnabled) {
-        helper.looseBBOXEnabled = looseBBOXEnabled;
-    }
+    }   
 
     @Override
     protected void visitLiteralGeometry(Literal expression) throws IOException {

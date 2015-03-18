@@ -17,7 +17,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * h2spatial. If not, see <http://www.gnu.org/licenses/>.
+ * h2gis-gs. If not, see <http://www.gnu.org/licenses/>.
  *
  * For more information, please consult: <http://www.orbisgis.org/>
  * or contact directly:
@@ -36,19 +36,16 @@ import org.geotools.data.jdbc.datasource.DBCPDataSource;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.JDBCDataStoreFactory;
 import org.geotools.jdbc.SQLDialect;
-import org.h2gis.h2spatial.CreateSpatialExtension;
 import org.h2gis.utilities.JDBCUtilities;
+import org.h2gis.h2spatialext.CreateSpatialExtension;
 
 
 /**
  * DataStoreFacotry for H2GIS database.
  *
- * @author Justin Deoliveira, The Open Planning Project
  * @author Nicolas Fortin, CNRS Atelier SIG
  * @author Erwan Bocher, CNRS Atelier SIG
  *
- *
- * @source $URL$
  */
 public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
     /** parameter for database type */
@@ -164,7 +161,7 @@ public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
         
         if (host != null && !host.equals("")) {
             Integer port = (Integer) PORT.lookUp(params);
-            if (port != null && !port.equals("")) {
+            if (port != null) {
                 dataSource.setUrl("jdbc:h2:tcp://" + host + ":" + port + "/" + database);
             }
             else {

@@ -17,7 +17,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * h2spatial. If not, see <http://www.gnu.org/licenses/>.
+ * h2gis-gs. If not, see <http://www.gnu.org/licenses/>.
  *
  * For more information, please consult: <http://www.orbisgis.org/>
  * or contact directly:
@@ -30,10 +30,10 @@ import org.orbisgis.geoserver.h2gis.datastore.H2GISDataStoreFactory;
 import org.geoserver.platform.GeoServerResourceLoader;
 
 /**
- * Initializes an H2 data store factory setting its location to the geoserver
+ * Initializes an H2GIS data store factory setting its location to the geoserver
  *  data directory.
  *
- * @author Justin Deoliveira, The Open Planning Project
+ * @author Erwan Bocher
  *
  */
 public class H2GISDataStoreFactoryInitializer extends 
@@ -41,10 +41,17 @@ public class H2GISDataStoreFactoryInitializer extends
 
     GeoServerResourceLoader resourceLoader;
     
+    /**
+     * 
+     */
     public H2GISDataStoreFactoryInitializer() {
         super( H2GISDataStoreFactory.class );
     }
     
+    /**
+     * 
+     * @param resourceLoader 
+     */
     public void setResourceLoader(GeoServerResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }

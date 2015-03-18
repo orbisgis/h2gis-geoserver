@@ -17,7 +17,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * h2spatial. If not, see <http://www.gnu.org/licenses/>.
+ * h2gis-gs. If not, see <http://www.gnu.org/licenses/>.
  *
  * For more information, please consult: <http://www.orbisgis.org/>
  * or contact directly:
@@ -32,13 +32,9 @@ import static org.orbisgis.geoserver.h2gis.datastore.H2GISDataStoreFactory.ASSOC
 import org.geotools.jdbc.JDBCJNDIDataStoreFactory;
 
 /**
- * JNDI DataStoreFactory for H2. 
+ * JNDI DataStoreFactory for H2GIS. 
  * 
- * @author Christian Mueller
- *
- *
- *
- * @source $URL$
+ * 
  */
 public class H2GISJNDIDataStoreFactory extends JDBCJNDIDataStoreFactory {
 
