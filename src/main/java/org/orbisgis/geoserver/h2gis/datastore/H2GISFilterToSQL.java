@@ -66,7 +66,7 @@ public class H2GISFilterToSQL extends FilterToSQL {
 
     @Override
     protected FilterCapabilities createFilterCapabilities() {
-        return h2GISFilterToSQLHelper.createFilterCapabilities(functionEncodingEnabled);
+        return H2GISFilterToSQLHelper.createFilterCapabilities(functionEncodingEnabled);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class H2GISFilterToSQL extends FilterToSQL {
 
     @Override
     protected String getFunctionName(Function function) {
-        return h2GISFilterToSQLHelper.getFunctionName(function);
+        return H2GISFilterToSQLHelper.getFunctionName(function);
     }
 
     @Override

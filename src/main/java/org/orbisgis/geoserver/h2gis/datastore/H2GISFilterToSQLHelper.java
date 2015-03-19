@@ -298,7 +298,7 @@ public class H2GISFilterToSQLHelper {
      * @param function
      * @return
      */
-    public String getFunctionName(Function function) {
+    public static String getFunctionName(Function function) {
         if (function instanceof FilterFunction_strLength) {
             return "length";
         } else if (function instanceof FilterFunction_strToLowerCase) {
@@ -310,7 +310,7 @@ public class H2GISFilterToSQLHelper {
                 || function instanceof FilterFunction_abs_3
                 || function instanceof FilterFunction_abs_4) {
             return "abs";
-        } else if (function instanceof FilterFunction_strToUpperCase) {
+        } else if (function instanceof FilterFunction_exp) {
             return "exp";
         }
         return function.getName();

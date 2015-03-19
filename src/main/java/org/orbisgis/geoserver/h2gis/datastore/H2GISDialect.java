@@ -102,7 +102,7 @@ public class H2GISDialect extends BasicSQLDialect {
     };
       
     
-    boolean functionEncodingEnabled = false;    
+    boolean functionEncodingEnabled = true;    
     
     
     @Override

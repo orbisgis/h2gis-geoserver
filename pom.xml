@@ -24,65 +24,22 @@
             <artifactId>gs-main</artifactId>
             <version>${geoserver-version}</version>
         </dependency>       
-         <dependency>
-             <groupId>junit</groupId>
-             <artifactId>junit</artifactId>
-             <version>${junit-version}</version>
-         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit-version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-jdbc</artifactId>
             <version>${geotools-version}</version>
         </dependency>
         <dependency>
-            <groupId>org.orbisgis</groupId>
-            <artifactId>jdelaunay</artifactId>
-            <version>${jdelaunay-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>${jts-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${h2-package}</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>h2spatial-api</artifactId>
-            <version>${h2gis-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>h2spatial</artifactId>
-            <version>${h2gis-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>h2drivers</artifactId>
-            <version>${h2gis-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>h2network</artifactId>
-            <version>${h2gis-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>spatial-utilities</artifactId>
-            <version>${h2gis-version}</version>
-        </dependency>        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cts</artifactId>
-            <version>${cts-version}</version>
-        </dependency>        
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>h2spatial-ext</artifactId>
             <version>${h2gis-version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <properties>
@@ -123,17 +80,65 @@
             <name>Boundless Maven Repository</name>
             <url>http://repo.boundlessgeo.com/main/</url>
         </repository>
-</repositories>
-<build>
-    <plugins>          
-        <plugin>
+    </repositories>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.html</include>
+                    <include>**/*.css</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>          
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
-        </plugin>
-    </plugins>
+            </plugin>            
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.5.1</version>
+                <executions>
+                    <execution>
+                        <!-- Copy priority level bundles (log) -->
+                        <id>copy-sys-dependencies</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/plugin-dep/</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <transitive>true</transitive>
+                            <excludeTransitive>false</excludeTransitive>
+                            <stripVersion>true</stripVersion>
+                            <includeScope>provided</includeScope>
+                            <excludeArtifactIds>slf4j-api</excludeArtifactIds>
+                        </configuration>
+                    </execution>                    
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>

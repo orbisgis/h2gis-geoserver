@@ -210,6 +210,22 @@ public class H2GISTest extends H2GISDBTestSetUp {
         st.execute("drop table LANDCOVER");
     }
     
+    @Test
+    public void getFeaturesFilter3() throws SQLException, IOException, CQLException {
+        st.execute("drop table if exists LANDCOVER");
+        st.execute("CREATE TABLE LANDCOVER ( FID INTEGER, CODE INTEGER,"
+                + " THE_GEOM POLYGON);"
+                + "INSERT INTO LANDCOVER VALUES(1, -1, 'POLYGON((110 330, 210 330, 210 240, 110 240, 110 330))');"
+                + "INSERT INTO LANDCOVER VALUES(2, 3, 'POLYGON((200 220, 310 220, 310 160, 200 160, 200 220))');"
+                + "INSERT INTO LANDCOVER VALUES(3, -1, 'POLYGON((90 130, 140 130, 140 110, 90 110, 90 130))');");
+
+        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("LANDCOVER");        
+        Filter filter = CQL.toFilter("FID < abs(CODE)" );
+        SimpleFeatureCollection features = fs.getFeatures(filter);        
+        assertTrue(features.size()==1);
+        st.execute("drop table LANDCOVER");
+    }
+    
     
     @Test
     public void testBboxFilter() throws SQLException, IOException, CQLException, ParseException {
