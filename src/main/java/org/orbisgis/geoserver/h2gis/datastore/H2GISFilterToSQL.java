@@ -41,11 +41,11 @@ import org.opengis.filter.spatial.BinarySpatialOperator;
  */
 public class H2GISFilterToSQL extends FilterToSQL {
 
-    H2GISFilterToSQLHelper helper;
+    H2GISFilterToSQLHelper h2GISFilterToSQLHelper;
     private boolean functionEncodingEnabled;
 
     public H2GISFilterToSQL(H2GISDialect dialect) {
-        helper = new H2GISFilterToSQLHelper(this);
+        h2GISFilterToSQLHelper = new H2GISFilterToSQLHelper(this);
     }   
 
     @Override
@@ -66,31 +66,31 @@ public class H2GISFilterToSQL extends FilterToSQL {
 
     @Override
     protected FilterCapabilities createFilterCapabilities() {
-        return helper.createFilterCapabilities(functionEncodingEnabled);
+        return h2GISFilterToSQLHelper.createFilterCapabilities(functionEncodingEnabled);
     }
 
     @Override
     protected Object visitBinarySpatialOperator(BinarySpatialOperator filter,
             PropertyName property, Literal geometry, boolean swapped,
             Object extraData) {
-        helper.out = out;
-        return helper.visitBinarySpatialOperator(filter, property, geometry,
+        h2GISFilterToSQLHelper.out = out;
+        return h2GISFilterToSQLHelper.visitBinarySpatialOperator(filter, property, geometry,
                 swapped, extraData);
     }
 
     @Override
     protected Object visitBinarySpatialOperator(BinarySpatialOperator filter, Expression e1,
             Expression e2, Object extraData) {
-        helper.out = out;
-        return helper.visitBinarySpatialOperator(filter, e1, e2, extraData);
+        h2GISFilterToSQLHelper.out = out;
+        return h2GISFilterToSQLHelper.visitBinarySpatialOperator(filter, e1, e2, extraData);
     }   
 
     @Override
     public Object visit(Function function, Object extraData) throws RuntimeException {
-        helper.out = out;
+        h2GISFilterToSQLHelper.out = out;
         try {
             encodingFunction = true;
-            boolean encoded = helper.visitFunction(function, extraData);
+            boolean encoded = h2GISFilterToSQLHelper.visitFunction(function, extraData);
             encodingFunction = false;
             if (encoded) {
                 return extraData;
@@ -104,14 +104,18 @@ public class H2GISFilterToSQL extends FilterToSQL {
 
     @Override
     protected String getFunctionName(Function function) {
-        return helper.getFunctionName(function);
+        return h2GISFilterToSQLHelper.getFunctionName(function);
     }
 
     @Override
     protected String cast(String encodedProperty, Class target) throws IOException {
-        return helper.cast(encodedProperty, target);
+        return h2GISFilterToSQLHelper.cast(encodedProperty, target);
     }
 
+    /**
+     * 
+     * @param functionEncodingEnabled 
+     */
     public void setFunctionEncodingEnabled(boolean functionEncodingEnabled) {
         this.functionEncodingEnabled = functionEncodingEnabled;
     }

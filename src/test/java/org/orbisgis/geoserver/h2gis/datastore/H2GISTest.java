@@ -26,33 +26,22 @@
 package org.orbisgis.geoserver.h2gis.datastore;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
 import com.vividsolutions.jts.io.ParseException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Query;
-import org.geotools.data.Transaction;
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
-import org.geotools.geometry.jts.GeometryBuilder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.jdbc.JDBCFeatureStore;
+import org.geotools.referencing.CRS;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -65,6 +54,7 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Function;
 import org.opengis.filter.spatial.BBOX;
 import org.opengis.filter.spatial.Intersects;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  *
@@ -252,8 +242,39 @@ public class H2GISTest extends H2GISDBTestSetUp {
         assertTrue(fc.size() == 1);
         SimpleFeature[] features = (SimpleFeature[]) fc.toArray(new SimpleFeature[fc.size()]);
         assertTrue(features[0].getDefaultGeometry().equals(wKTReader.read("POINT(5 5)")));
+        st.execute("drop table LANDCOVER");       
+    }
+    
+    @Test
+    public void testNoCRS() throws Exception {
+        st.execute("drop table if exists LANDCOVER");
+        st.execute("CREATE TABLE LANDCOVER ( FID INTEGER, NAME CHARACTER VARYING(64),"
+                + " THE_GEOM POLYGON);"
+                + "INSERT INTO LANDCOVER VALUES(1, 'Green Forest', 'POLYGON((110 330, 210 330, 210 240, 110 240, 110 330))');"
+                + "INSERT INTO LANDCOVER VALUES(2, 'Cereal', 'POLYGON((200 220, 310 220, 310 160, 200 160, 200 220))');"
+                + "INSERT INTO LANDCOVER VALUES(3, 'Building', 'POLYGON((90 130, 140 130, 140 110, 90 110, 90 130))');");
+
+        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("LANDCOVER");
+        SimpleFeatureCollection features = fs.getFeatures(Filter.INCLUDE);
+        CoordinateReferenceSystem crs = features.getBounds().getCoordinateReferenceSystem();
+        assertNull(crs);
         st.execute("drop table LANDCOVER");
-       
+    }
+
+    @Test
+    public void testWithCRS() throws Exception {
+        st.execute("drop table if exists FORESTS");
+        st.execute("CREATE TABLE FORESTS ( FID INTEGER, NAME CHARACTER VARYING(64),"
+                + " THE_GEOM MULTIPOLYGON);"
+                + "INSERT INTO FORESTS VALUES(109, 'Green Forest', ST_MPolyFromText( 'MULTIPOLYGON(((28 26,28 0,84 0,"
+                + "84 42,28 26), (52 18,66 23,73 9,48 6,52 18)),((59 18,67 18,67 13,59 13,59 18)))', 4326));");
+
+        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("FORESTS");
+        SimpleFeatureCollection features = fs.getFeatures(Filter.INCLUDE);
+        CoordinateReferenceSystem crs = features.getBounds().getCoordinateReferenceSystem();
+        assertNotNull(crs);
+        assertEquals("EPSG:4326", CRS.lookupIdentifier(crs, true));
+        st.execute("drop table FORESTS");
     }
 
 }

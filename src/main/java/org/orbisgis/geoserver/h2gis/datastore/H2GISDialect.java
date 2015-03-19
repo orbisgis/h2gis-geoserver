@@ -102,8 +102,7 @@ public class H2GISDialect extends BasicSQLDialect {
     };
       
     
-    boolean functionEncodingEnabled = false;
-    
+    boolean functionEncodingEnabled = false;    
     
     
     @Override
@@ -111,14 +110,22 @@ public class H2GISDialect extends BasicSQLDialect {
        return "distinct".equalsIgnoreCase(function);
     }
 
+    /**
+     *
+     * @param dataStore
+     */
     public H2GISDialect(JDBCDataStore dataStore) {
         super(dataStore);
     }
-   
-        public boolean isFunctionEncodingEnabled() {
+
+    /**
+     *
+     * @return
+     */
+    public boolean isFunctionEncodingEnabled() {
         return functionEncodingEnabled;
     }
-        
+
     @Override
     public void initializeConnection(Connection cx) throws SQLException {
         super.initializeConnection(cx);
@@ -192,8 +199,8 @@ public class H2GISDialect extends BasicSQLDialect {
                 // empty one
                 return new Envelope();
         } catch (ParseException e) {
-            throw (IOException) new IOException(
-                    "Error occurred parsing the bounds WKT").initCause(e);
+            throw new IOException(
+                    "Cannot create the bounding box", e);
         }
     }
 
@@ -213,11 +220,9 @@ public class H2GISDialect extends BasicSQLDialect {
             gType = SFSUtilities.getGeometryTypeNameFromCode(columnMetaData.getInt("DATA_TYPE"));
         } else {
             return null;
-        }
-       
+        }       
         // decode the type into
         if(gType == null) {
-            // it's either a generic geography or geometry not registered in the medatata tables
             return Geometry.class;
         } else {
             Class geometryClass = TYPE_TO_CLASS_MAP.get(gType.toUpperCase());

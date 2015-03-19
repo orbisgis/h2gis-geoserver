@@ -53,6 +53,7 @@ import org.geotools.filter.function.math.FilterFunction_abs_2;
 import org.geotools.filter.function.math.FilterFunction_abs_3;
 import org.geotools.filter.function.math.FilterFunction_abs_4;
 import org.geotools.filter.function.math.FilterFunction_ceil;
+import org.geotools.filter.function.math.FilterFunction_exp;
 import org.geotools.filter.function.math.FilterFunction_floor;
 import org.geotools.jdbc.SQLDialect;
 import org.opengis.filter.expression.Expression;
@@ -72,14 +73,12 @@ import org.opengis.filter.spatial.Intersects;
 import org.opengis.filter.spatial.Overlaps;
 import org.opengis.filter.spatial.Touches;
 import org.opengis.filter.spatial.Within;
-
 /**
  * 
  * @author Erwan Bocher
  */
 public class H2GISFilterToSQLHelper {
 
-    protected static final String IO_ERROR = "io problem writing filter";
     
     FilterToSQL filterToSQL;
     Writer out;
@@ -114,7 +113,7 @@ public class H2GISFilterToSQLHelper {
         caps.addType(Beyond.class);
 
         if (encodeFunctions) {
-// add support for string functions
+            // add support for string functions
             caps.addType(FilterFunction_strConcat.class);
             caps.addType(FilterFunction_strEndsWith.class);
             caps.addType(FilterFunction_strStartsWith.class);
@@ -128,17 +127,27 @@ public class H2GISFilterToSQLHelper {
             caps.addType(FilterFunction_strSubstringStart.class);
             caps.addType(FilterFunction_strTrim.class);
             caps.addType(FilterFunction_strTrim2.class);
-// add support for math functions
+            // add support for math functions
             caps.addType(FilterFunction_abs.class);
             caps.addType(FilterFunction_abs_2.class);
             caps.addType(FilterFunction_abs_3.class);
             caps.addType(FilterFunction_abs_4.class);
             caps.addType(FilterFunction_ceil.class);
             caps.addType(FilterFunction_floor.class);
+            caps.addType(FilterFunction_exp.class);
         }
         return caps;
     }
 
+    /**
+     * 
+     * @param filter
+     * @param property
+     * @param geometry
+     * @param swapped
+     * @param extraData
+     * @return 
+     */
     protected Object visitBinarySpatialOperator(BinarySpatialOperator filter,
             PropertyName property, Literal geometry, boolean swapped,
             Object extraData) {
@@ -151,7 +160,7 @@ public class H2GISFilterToSQLHelper {
                         swapped, extraData);
             }
         } catch (IOException e) {
-            throw new RuntimeException(IO_ERROR, e);
+            throw new RuntimeException("Cannot create this spatial filter", e);
         }
         return extraData;
     }
@@ -169,7 +178,7 @@ public class H2GISFilterToSQLHelper {
         try {
             visitBinarySpatialOperator(filter, e1, e2, false, extraData);
         } catch (IOException e) {
-            throw new RuntimeException(IO_ERROR, e);
+            throw new RuntimeException("Cannot create this spatial filter", e);
         }
         return extraData;
     }
@@ -183,7 +192,7 @@ public class H2GISFilterToSQLHelper {
      * @param extraData
      * @throws IOException 
      */
-    void visitDistanceSpatialOperator(DistanceBufferOperator filter,
+   private void visitDistanceSpatialOperator(DistanceBufferOperator filter,
             PropertyName property, Literal geometry, boolean swapped,
             Object extraData) throws IOException {
         if ((filter instanceof DWithin && !swapped)
@@ -208,8 +217,16 @@ public class H2GISFilterToSQLHelper {
     }
 
    
-
-    void visitComparisonSpatialOperator(BinarySpatialOperator filter,
+    /**
+     *
+     * @param filter
+     * @param property
+     * @param geometry
+     * @param swapped
+     * @param extraData
+     * @throws IOException
+     */
+    private void visitComparisonSpatialOperator(BinarySpatialOperator filter,
             PropertyName property, Literal geometry, boolean swapped, Object extraData)
             throws IOException {
         // add && filter if possible
@@ -226,7 +243,16 @@ public class H2GISFilterToSQLHelper {
         visitBinarySpatialOperator(filter, (Expression) property, (Expression) geometry, swapped, extraData);
     }
 
-    void visitBinarySpatialOperator(BinarySpatialOperator filter, Expression e1, Expression e2,
+    /**
+     * 
+     * @param filter
+     * @param e1
+     * @param e2
+     * @param swapped
+     * @param extraData
+     * @throws IOException 
+     */
+    private void visitBinarySpatialOperator(BinarySpatialOperator filter, Expression e1, Expression e2,
             boolean swapped, Object extraData) throws IOException {
         String closingParenthesis = ")";
         if (filter instanceof Equals) {
@@ -268,13 +294,13 @@ public class H2GISFilterToSQLHelper {
 
     /**
      * Maps a function to its native db equivalent
-     *     
-* @param function
+     *
+     * @param function
      * @return
      */
     public String getFunctionName(Function function) {
         if (function instanceof FilterFunction_strLength) {
-            return "char_length";
+            return "length";
         } else if (function instanceof FilterFunction_strToLowerCase) {
             return "lower";
         } else if (function instanceof FilterFunction_strToUpperCase) {
@@ -284,6 +310,8 @@ public class H2GISFilterToSQLHelper {
                 || function instanceof FilterFunction_abs_3
                 || function instanceof FilterFunction_abs_4) {
             return "abs";
+        } else if (function instanceof FilterFunction_strToUpperCase) {
+            return "exp";
         }
         return function.getName();
     }
@@ -345,31 +373,27 @@ public class H2GISFilterToSQLHelper {
         } else if (function instanceof FilterFunction_strIndexOf) {
             Expression first = getParameter(function, 0, true);
             Expression second = getParameter(function, 1, true);
-// would be a simple call, but strIndexOf returns zero based indices
-            out.write("(strpos(");
+            // would be a simple call, but strIndexOf returns zero based indices
+            out.write("(POSITION(");
             first.accept(filterToSQL, String.class);
             out.write(", ");
             second.accept(filterToSQL, String.class);
-            out.write(") - 1)");
+            out.write(")");
         } else if (function instanceof FilterFunction_strSubstring) {
             Expression string = getParameter(function, 0, true);
             Expression start = getParameter(function, 1, true);
             Expression end = getParameter(function, 2, true);
-// postgres does sub(string, start, count)... count instead of end, and 1 based indices
-            out.write("substr(");
+            out.write("SUBSTRING(");
             string.accept(filterToSQL, String.class);
             out.write(", ");
             start.accept(filterToSQL, Integer.class);
-            out.write(" + 1, (");
+            out.write(", ");
             end.accept(filterToSQL, Integer.class);
-            out.write(" - ");
-            start.accept(filterToSQL, Integer.class);
-            out.write("))");
+            out.write(")");
         } else if (function instanceof FilterFunction_strSubstringStart) {
             Expression string = getParameter(function, 0, true);
             Expression start = getParameter(function, 1, true);
-// postgres does sub(string, start, count)... count instead of end, and 1 based indices
-            out.write("substr(");
+            out.write("SUBSTRING(");
             string.accept(filterToSQL, String.class);
             out.write(", ");
             start.accept(filterToSQL, Integer.class);
@@ -380,12 +404,19 @@ public class H2GISFilterToSQLHelper {
             string.accept(filterToSQL, String.class);
             out.write(")");
         } else {
-// function not supported
+            // function not supported
             return false;
         }
         return true;
     }
 
+    /**
+     * 
+     * @param function
+     * @param idx
+     * @param mandatory
+     * @return 
+     */
     private Expression getParameter(Function function, int idx, boolean mandatory) {
         final List<Expression> params = function.getParameters();
         if (params == null || params.size() <= idx) {
@@ -397,6 +428,12 @@ public class H2GISFilterToSQLHelper {
         return params.get(idx);
     }
 
+    /**
+     * 
+     * @param property
+     * @param target
+     * @return 
+     */
     public String cast(String property, Class target) {
         if (String.class.equals(target)) {
             return property + "::varchar";
@@ -425,7 +462,6 @@ public class H2GISFilterToSQLHelper {
         } else if (java.util.Date.class.isAssignableFrom(target)) {
             return property + "::timesamp";
         } else {
-        // dunno how to cast, leave as is
             return property;
         }
     }
