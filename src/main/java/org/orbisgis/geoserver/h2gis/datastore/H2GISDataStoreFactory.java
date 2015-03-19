@@ -162,10 +162,10 @@ public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
         if (host != null && !host.equals("")) {
             Integer port = (Integer) PORT.lookUp(params);
             if (port != null) {
-                dataSource.setUrl("jdbc:h2:tcp://" + host + ":" + port + "//" + database);
+                dataSource.setUrl("jdbc:h2:tcp://" + host + ":" + port + "/" + database);
             }
             else {
-                dataSource.setUrl("jdbc:h2:tcp://" + host + "//" + database);
+                dataSource.setUrl("jdbc:h2:tcp://" + host + "/" + database);
             }
         } else if (baseDirectory == null) {
             //use current working directory

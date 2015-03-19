@@ -42,6 +42,7 @@ public class H2GISDataStoreFactoryInitializer extends
     GeoServerResourceLoader resourceLoader;
     
     /**
+     * Load the H2GISDataStore
      * 
      */
     public H2GISDataStoreFactoryInitializer() {
@@ -49,7 +50,7 @@ public class H2GISDataStoreFactoryInitializer extends
     }
     
     /**
-     * 
+     * Init the GeoServer resource loader
      * @param resourceLoader 
      */
     public void setResourceLoader(GeoServerResourceLoader resourceLoader) {

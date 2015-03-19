@@ -30,10 +30,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
+import static junit.framework.TestCase.fail;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.geotools.data.DataStore;
 import org.geotools.data.jdbc.datasource.ManageableDataSource;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.JDBCDataStoreFactory;
+import org.h2.tools.Server;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -89,4 +92,34 @@ public class H2DataStoreFactoryTest  {
             assertTrue(url.contains("MVCC=true"));
         }
     } 
+    
+    //@Test Doesn't work yet
+    public void testTCP() throws Exception {
+        HashMap params = new HashMap();
+        params.put(H2GISDataStoreFactory.HOST.key, "localhost");
+        params.put(H2GISDataStoreFactory.DATABASE.key, "geotools");
+        params.put(H2GISDataStoreFactory.USER.key, "h2gis");
+        params.put(H2GISDataStoreFactory.PASSWD.key, "h2gis");
+        
+        DataStore ds = factory.createDataStore(params);
+        try {
+            ds.getTypeNames();
+            fail("Should not have made a connection.");
+        }
+        catch(Exception ok) {}
+        
+        Server server = Server.createTcpServer(new String[]{"-baseDir", "target"});
+        server.start();
+        try {
+            while(!server.isRunning(false)) {
+                Thread.sleep(100);
+            }
+            
+            ds = factory.createDataStore(params);
+            ds.getTypeNames();
+        }
+        finally {
+            server.shutdown();
+        }
+    }
 }
