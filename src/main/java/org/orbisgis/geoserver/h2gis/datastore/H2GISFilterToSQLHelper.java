@@ -212,7 +212,6 @@ public class H2GISFilterToSQLHelper {
     void visitComparisonSpatialOperator(BinarySpatialOperator filter,
             PropertyName property, Literal geometry, boolean swapped, Object extraData)
             throws IOException {
-
         // add && filter if possible
         if (!(filter instanceof Disjoint)) {
             property.accept(filterToSQL, extraData);
