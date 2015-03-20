@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.orbisgis</groupId>
-    <artifactId>geoserver-h2gis</artifactId>
-    <version>0.0.1</version>
+    <artifactId>h2gis-gs</artifactId>
+    <version>1.0</version>
     <packaging>jar</packaging>
     <name>H2GIS-GS</name>
     <description>H2GIS-GS is an extension to connect the spatial extension of the H2 database engine, H2GIS to geoserver.</description>
