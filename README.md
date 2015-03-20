@@ -1,16 +1,17 @@
 # geoserver-h2gis or H2GIS-GS
 
 Is an extension to use H2GIS with Geoserver.
-
-Install
+ 
+### Install
 
 In a terminal, run
 
+```bash
+$ mvn clean install
 ```
-mvn clean install
 
-```
+* Go to your target folder, select the h2gis-gs-XX.jar and copy-paste it to the WEB-INF/lib directory of your GeoServer installation.
+* In your target folder, go to plugin-dep that contains all dependencies. Select all jars and copy-paste it to the WEB-INF/lib directory of your GeoServer installation.
+* Restart GeoServer
 
-Go to your target folder, select the h2gis-gs-XX.jar and copy-paste it to the WEB-INF/lib directory of your GeoServer installation.
-In your target folder, go to plugin-dep that contains all dependencies. Select all jars and copy-paste it to the WEB-INF/lib directory of your GeoServer installation.
-Restart GeoServer
+
