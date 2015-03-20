@@ -561,22 +561,7 @@ public class H2GISDialect extends BasicSQLDialect {
     @Override
     public void postDropTable(String schemaName, SimpleFeatureType featureType, Connection cx)
             throws SQLException {
-        Statement st = cx.createStatement();
-        String tableName = featureType.getTypeName();
-
-        try {
-            //remove all the geometry_column entries
-            String sql = 
-                "DELETE FROM GEOMETRY_COLUMNS"
-                    + " WHERE f_table_catalog=''" //
-                    + " AND f_table_schema = '" + schemaName + "'" 
-                    + " AND f_table_name = '" + tableName + "'";
-            LOGGER.fine( sql );
-            st.execute( sql );
-        }
-        finally {
-            dataStore.closeSafe(st);
-        }
+        //Nothing todo it's a view and a view is not editable.
     }
 
     @Override
