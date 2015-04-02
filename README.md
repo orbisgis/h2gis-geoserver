@@ -1,6 +1,8 @@
 # geoserver-h2gis or H2GIS-GS
 
-Is an extension to use H2GIS with Geoserver.
+Is an extension to use H2GIS with Geoserver 2.6.2.
+
+Note that this version doesn't support H2GIS linked table.
  
 ### Install
 
