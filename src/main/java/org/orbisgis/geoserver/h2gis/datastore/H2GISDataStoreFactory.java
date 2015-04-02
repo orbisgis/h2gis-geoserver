@@ -234,6 +234,9 @@ public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
     @Override
     protected String getValidationQuery() {
         return "select now()";
-    }
+    }  
+    
+    
+    
 
 }

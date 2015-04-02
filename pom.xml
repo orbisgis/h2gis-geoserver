@@ -53,7 +53,7 @@
         <jdelaunay-version>0.5.3</jdelaunay-version>
         <junit-version>4.11</junit-version>
         <geoserver-version>2.6.2</geoserver-version>
-        <geotools-version>12.2</geotools-version>
+        <geotools-version>14-SNAPSHOT</geotools-version>
         <h2gis-version>1.2.0</h2gis-version>
     </properties>
     <developers>

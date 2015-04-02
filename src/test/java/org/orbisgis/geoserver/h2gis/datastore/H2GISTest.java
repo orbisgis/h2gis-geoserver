@@ -26,7 +26,6 @@
 package org.orbisgis.geoserver.h2gis.datastore;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import java.io.IOException;
@@ -319,5 +318,17 @@ public class H2GISTest extends H2GISDBTestSetUp {
         ds.dropVirtualTable("LANDCOVER_CEREAL");        
         st.execute("drop table LANDCOVER");
     }
-
+    
+    
+    @Test
+    public void testH2GISFileTable() throws SQLException, IOException {
+        st.execute("drop table if exists LANDCOVER");
+        st.execute("CALL FILE_TABLE('" + H2GISTest.class.getResource("landcover.shp").getPath() + "', 'LANDCOVER');");
+        assertTrue(st.execute("SELECT * FROM LANDCOVER LIMIT 0;"));
+        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("LANDCOVER");
+        SimpleFeatureType schema = fs.getSchema();
+        Query query = new Query(schema.getTypeName(), Filter.INCLUDE);
+        assertEquals(3, fs.getCount(query));
+        st.execute("drop table LANDCOVER");
+    }
 }

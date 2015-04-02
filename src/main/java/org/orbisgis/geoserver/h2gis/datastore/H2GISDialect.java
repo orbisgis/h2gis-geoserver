@@ -134,9 +134,9 @@ public class H2GISDialect extends BasicSQLDialect {
     @Override
     public boolean includeTable(String schemaName, String tableName,
             Connection cx) throws SQLException {
-        if (tableName.equals("geometry_columns")) {
+        if (tableName.equalsIgnoreCase("geometry_columns")) {
             return false;
-        } else if (tableName.startsWith("spatial_ref_sys")) {
+        } else if (tableName.toLowerCase().startsWith("spatial_ref_sys")) {
             return false;
         } 
         return true;
@@ -579,6 +579,7 @@ public class H2GISDialect extends BasicSQLDialect {
             sql.append("ST_GeomFromText('").append(wkt).append("', ").append(srid).append(")");
         }
     }
+    
 
     @Override
     public FilterToSQL createFilterToSQL() {
@@ -628,4 +629,10 @@ public class H2GISDialect extends BasicSQLDialect {
     public int getDefaultVarcharSize(){
         return -1;
     }
+
+    @Override
+    public String[] getDesiredTablesType() {
+        return new String[]{"TABLE", "VIEW", "MATERIALIZED VIEW", "SYNONYM", "TABLE LINK", "EXTERNAL"};
+    }
+    
 }

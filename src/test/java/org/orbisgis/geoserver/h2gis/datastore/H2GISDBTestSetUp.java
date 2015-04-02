@@ -32,9 +32,7 @@ import java.util.HashMap;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.JDBCDataStoreFactory;
 import org.junit.After;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Test;
 
 /**
  *
@@ -58,25 +56,28 @@ public abstract class H2GISDBTestSetUp {
         params.put(JDBCDataStoreFactory.NAMESPACE.key, "http://www.geotools.org/h2gis");
         params.put(JDBCDataStoreFactory.DATABASE.key, "h2gis");
         params.put(JDBCDataStoreFactory.DBTYPE.key, "h2gis");
+        params.put(JDBCDataStoreFactory.USER, "h2gis");
+        params.put(JDBCDataStoreFactory.PASSWD, "h2gis");
         ds = factory.createDataStore( params );
         wKTReader = new WKTReader();
     }
     
+    /**
+     * Generate a path for the database
+     * @param dbName
+     * @return 
+     */
     private static String getDataBasePath(String dbName) {
         if (dbName.startsWith("file://")) {
             return new File(URI.create(dbName)).getAbsolutePath();
         } else {
-            return new File("target/test-resources/dbH2" + dbName).getAbsolutePath();
+            return new File("target/test-resources/" + dbName).getAbsolutePath();
         }
     }
 
     @After
     public void tearDownDatabase() throws Exception {
         ds.getDataSource().getConnection().close();
-    }
+    }   
     
-    @Test
-    public void test_CreateDataStore() throws Exception {
-           assertTrue(true);
-    }
 }
