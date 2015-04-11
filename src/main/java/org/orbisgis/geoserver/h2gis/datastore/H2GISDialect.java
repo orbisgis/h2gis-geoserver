@@ -618,7 +618,7 @@ public class H2GISDialect extends BasicSQLDialect {
 
     @Override
     public String[] getDesiredTablesType() {
-        return new String[]{"TABLE", "VIEW", "MATERIALIZED VIEW", "SYNONYM", "TABLE LINK", "EXTERNAL"};
+        return new String[]{"TABLE", "VIEW", "TABLE LINK", "EXTERNAL"};
     }
 
     /**
