@@ -1,4 +1,4 @@
-# geoserver-h2gis or H2GIS-GS
+# H2GIS-GS
 
 Is an extension to use H2GIS with Geoserver 2.6.2.
 
