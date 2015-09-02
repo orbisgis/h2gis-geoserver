@@ -1,11 +1,11 @@
 /*
  * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
- * that brings spatial support to the H2 Java database.
+ * that brings spatial support to the H2 database engine.
  *
- * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
- * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the DECIDE
+ * team of the Lab-STICC laboratory <http://www.labsticc.fr/> CNRS UMR 6285.
  *
- * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
+ * Copyright (C) 2015-2016 Lab-STICC (CNRS UMR 6285)
  *
  * h2gis-gs  is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software

@@ -1,11 +1,11 @@
 /*
  * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
- * that brings spatial support to the H2 Java database.
+ * that brings spatial support to the H2 database engine.
  *
- * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
- * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the DECIDE
+ * team of the Lab-STICC laboratory <http://www.labsticc.fr/> CNRS UMR 6285.
  *
- * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
+ * Copyright (C) 2015-2016 Lab-STICC (CNRS UMR 6285)
  *
  * h2gis-gs  is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -65,43 +65,46 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 
 /**
- * 
+ * Dialect to transform from to geotools feature model 
  *
+ * @author Erwan Bocher, CNRS Atelier SIG
+ * @author Nicolas Fortin, CNRS Atelier SIG
  * 
  */
 public class H2GISDialect extends BasicSQLDialect {
 
     final static WKTReader wKTReader = new WKTReader();
+    private static final Map<String,Class> TYPE_TO_CLASS = new HashMap<String,Class>();
+    private static final Map<Class, String> CLASS_TO_TYPE = new HashMap<Class, String>();
     
-    //geometry type to class map
-    final static Map<String, Class> TYPE_TO_CLASS_MAP = new HashMap<String, Class>() {
-        {
-            put("GEOMETRY", Geometry.class);
-            put("POINT", Point.class);
-            put("LINESTRING", LineString.class);
-            put("POLYGON", Polygon.class);
-            put("MULTIPOINT", MultiPoint.class);
-            put("MULTILINESTRING", MultiLineString.class);
-            put("MULTIPOLYGON", MultiPolygon.class);
-            put("GEOMETRYCOLLECTION", GeometryCollection.class);
-        }
+    static{
+            TYPE_TO_CLASS.put("GEOMETRY", Geometry.class);
+            TYPE_TO_CLASS.put("POINT", Point.class);
+            TYPE_TO_CLASS.put("POINTM", Point.class);
+            TYPE_TO_CLASS.put("LINESTRING", LineString.class);
+            TYPE_TO_CLASS.put("LINESTRINGM", LineString.class);
+            TYPE_TO_CLASS.put("POLYGON", Polygon.class);
+            TYPE_TO_CLASS.put("POLYGONM", Polygon.class);
+            TYPE_TO_CLASS.put("MULTIPOINT", MultiPoint.class);            
+            TYPE_TO_CLASS.put("MULTIPOINTM", MultiPoint.class);
+            TYPE_TO_CLASS.put("MULTILINESTRING", MultiLineString.class);
+            TYPE_TO_CLASS.put("MULTILINESTRINGM", MultiLineString.class);
+            TYPE_TO_CLASS.put("MULTIPOLYGON", MultiPolygon.class);
+            TYPE_TO_CLASS.put("MULTIPOLYGONM", MultiPolygon.class);
+            TYPE_TO_CLASS.put("GEOMETRYCOLLECTION", GeometryCollection.class);
+            TYPE_TO_CLASS.put("GEOMETRYCOLLECTIONM", GeometryCollection.class);
+            TYPE_TO_CLASS.put("GEOGRAPHY", Geometry.class);    
+            
+            CLASS_TO_TYPE.put(Geometry.class, "GEOMETRY");
+            CLASS_TO_TYPE.put(Point.class, "POINT");
+            CLASS_TO_TYPE.put(LineString.class, "LINESTRING");
+            CLASS_TO_TYPE.put(Polygon.class, "POLYGON");
+            CLASS_TO_TYPE.put(MultiPoint.class, "MULTIPOINT");
+            CLASS_TO_TYPE.put(MultiLineString.class, "MULTILINESTRING");
+            CLASS_TO_TYPE.put(MultiPolygon.class, "MULTIPOLYGON");
+            CLASS_TO_TYPE.put(GeometryCollection.class, "GEOMETRYCOLLECTION");
+            CLASS_TO_TYPE.put(LinearRing.class, "LINEARRING");        
     };
-
-    //geometry class to type map
-    final static Map<Class, String> CLASS_TO_TYPE_MAP = new HashMap<Class, String>() {
-        {
-            put(Geometry.class, "GEOMETRY");
-            put(Point.class, "POINT");
-            put(LineString.class, "LINESTRING");
-            put(Polygon.class, "POLYGON");
-            put(MultiPoint.class, "MULTIPOINT");
-            put(MultiLineString.class, "MULTILINESTRING");
-            put(MultiPolygon.class, "MULTIPOLYGON");
-            put(GeometryCollection.class, "GEOMETRYCOLLECTION");
-            put(LinearRing.class, "LINEARRING");
-        }
-    };
-      
     
     boolean functionEncodingEnabled = true;    
     
@@ -503,7 +506,7 @@ public class H2GISDialect extends BasicSQLDialect {
                     }
 
                     // grab the geometry type
-                    String geomType = CLASS_TO_TYPE_MAP.get(gd.getType().getBinding());
+                    String geomType = CLASS_TO_TYPE.get(gd.getType().getBinding());
                     if (geomType == null) {
                         geomType = "GEOMETRY";
                     }
@@ -645,7 +648,7 @@ public class H2GISDialect extends BasicSQLDialect {
             if (gType == null) {
                 return Geometry.class;
             } else {
-                Class geometryClass = TYPE_TO_CLASS_MAP.get(gType);
+                Class geometryClass = TYPE_TO_CLASS.get(gType);
                 if (geometryClass == null) {
                     geometryClass = Geometry.class;
                 }

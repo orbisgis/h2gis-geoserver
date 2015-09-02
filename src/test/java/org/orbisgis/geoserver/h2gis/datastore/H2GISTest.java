@@ -1,11 +1,11 @@
 /*
  * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
- * that brings spatial support to the H2 Java database.
+ * that brings spatial support to the H2 database engine.
  *
- * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
- * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the DECIDE
+ * team of the Lab-STICC laboratory <http://www.labsticc.fr/> CNRS UMR 6285.
  *
- * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
+ * Copyright (C) 2015-2016 Lab-STICC (CNRS UMR 6285)
  *
  * h2gis-gs  is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static junit.framework.TestCase.assertNotNull;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.Query;
@@ -196,7 +198,7 @@ public class H2GISTest extends H2GISDBTestSetUp {
     }
     
     @Test
-    public void getFeaturesFilter2() throws SQLException, IOException, CQLException {
+    public void getFeaturesFilter2() throws Exception {
         st.execute("drop table if exists LANDCOVER");
         st.execute("CREATE TABLE LANDCOVER ( FID INTEGER, NAME CHARACTER VARYING(64),"
                 + " THE_GEOM POLYGON);"
@@ -215,19 +217,23 @@ public class H2GISTest extends H2GISDBTestSetUp {
     }
     
     @Test
-    public void getFeaturesFilter3() throws SQLException, IOException, CQLException {
-        st.execute("drop table if exists LANDCOVER");
-        st.execute("CREATE TABLE LANDCOVER ( FID INTEGER, CODE INTEGER,"
-                + " THE_GEOM POLYGON);"
-                + "INSERT INTO LANDCOVER VALUES(1, -1, 'POLYGON((110 330, 210 330, 210 240, 110 240, 110 330))');"
-                + "INSERT INTO LANDCOVER VALUES(2, 3, 'POLYGON((200 220, 310 220, 310 160, 200 160, 200 220))');"
-                + "INSERT INTO LANDCOVER VALUES(3, -1, 'POLYGON((90 130, 140 130, 140 110, 90 110, 90 130))');");
-
-        SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("LANDCOVER");        
-        Filter filter = CQL.toFilter("FID < abs(CODE)" );
-        SimpleFeatureCollection features = fs.getFeatures(filter);        
-        assertTrue(features.size()==1);
-        st.execute("drop table LANDCOVER");
+    public void getFeaturesFilter3() throws SQLException, IOException {
+        try {
+            st.execute("drop table if exists LANDCOVER");
+            st.execute("CREATE TABLE LANDCOVER ( FID INTEGER, CODE INTEGER,"
+                    + " THE_GEOM POLYGON);"
+                    + "INSERT INTO LANDCOVER VALUES(1, -1, 'POLYGON((110 330, 210 330, 210 240, 110 240, 110 330))');"
+                    + "INSERT INTO LANDCOVER VALUES(2, 3, 'POLYGON((200 220, 310 220, 310 160, 200 160, 200 220))');"
+                    + "INSERT INTO LANDCOVER VALUES(3, -1, 'POLYGON((90 130, 140 130, 140 110, 90 110, 90 130))');");
+            
+            SimpleFeatureSource fs = (SimpleFeatureSource) ds.getFeatureSource("LANDCOVER");
+            Filter filter = CQL.toFilter("FID < abs(CODE)" );
+            SimpleFeatureCollection features = fs.getFeatures(filter);
+            assertTrue(features.size()==1);
+            st.execute("drop table LANDCOVER");
+        } catch (CQLException ex) {
+            Logger.getLogger(H2GISTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     

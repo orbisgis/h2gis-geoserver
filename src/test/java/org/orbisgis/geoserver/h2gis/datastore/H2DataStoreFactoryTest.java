@@ -1,11 +1,11 @@
 /*
  * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
- * that brings spatial support to the H2 Java database.
+ * that brings spatial support to the H2 database engine.
  *
- * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
- * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the DECIDE
+ * team of the Lab-STICC laboratory <http://www.labsticc.fr/> CNRS UMR 6285.
  *
- * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
+ * Copyright (C) 2015-2016 Lab-STICC (CNRS UMR 6285)
  *
  * h2gis-gs  is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -30,24 +30,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import static junit.framework.TestCase.fail;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.geotools.data.DataStore;
 import org.geotools.data.jdbc.datasource.ManageableDataSource;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.JDBCDataStoreFactory;
-import org.h2.tools.Server;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-
-/**
- * 
- *
- */
 public class H2DataStoreFactoryTest  {
     H2GISDataStoreFactory factory;
     HashMap params;
@@ -90,36 +82,6 @@ public class H2DataStoreFactoryTest  {
             final BasicDataSource basicSource = (BasicDataSource) wrapped;
             final String url = basicSource.getUrl();
             assertTrue(url.contains("MVCC=true"));
-        }
-    } 
-    
-    //@Test Doesn't work yet
-    public void testTCP() throws Exception {
-        HashMap params = new HashMap();
-        params.put(H2GISDataStoreFactory.HOST.key, "localhost");
-        params.put(H2GISDataStoreFactory.DATABASE.key, "geotools");
-        params.put(H2GISDataStoreFactory.USER.key, "h2gis");
-        params.put(H2GISDataStoreFactory.PASSWD.key, "h2gis");
-        
-        DataStore ds = factory.createDataStore(params);
-        try {
-            ds.getTypeNames();
-            fail("Should not have made a connection.");
-        }
-        catch(Exception ok) {}
-        
-        Server server = Server.createTcpServer(new String[]{"-baseDir", "target"});
-        server.start();
-        try {
-            while(!server.isRunning(false)) {
-                Thread.sleep(100);
-            }
-            
-            ds = factory.createDataStore(params);
-            ds.getTypeNames();
-        }
-        finally {
-            server.shutdown();
         }
     }
 }
