@@ -1,11 +1,11 @@
 /*
  * h2gis-gs is an extension to geoserver to connect H2GIS a spatial library 
- * that brings spatial support to the H2 Java database.
+ * that brings spatial support to the H2 database engine.
  *
- * h2gis-gs  is distributed under GPL 3 license. It is produced by the "Atelier SIG"
- * team of the IRSTV Institute <http://www.irstv.fr/> CNRS FR 2488.
+ * h2gis-gs  is distributed under GPL 3 license. It is produced by the DECIDE
+ * team of the Lab-STICC laboratory <http://www.labsticc.fr/> CNRS UMR 6285.
  *
- * Copyright (C) 2014-2015 IRSTV (FR CNRS 2488)
+ * Copyright (C) 2015-2016 Lab-STICC (CNRS UMR 6285)
  *
  * h2gis-gs  is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -41,6 +41,7 @@ import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -64,43 +65,46 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 
 /**
- * 
+ * Dialect to transform from to geotools feature model 
  *
+ * @author Erwan Bocher, CNRS Atelier SIG
+ * @author Nicolas Fortin, CNRS Atelier SIG
  * 
  */
 public class H2GISDialect extends BasicSQLDialect {
 
     final static WKTReader wKTReader = new WKTReader();
+    private static final Map<String,Class> TYPE_TO_CLASS = new HashMap<String,Class>();
+    private static final Map<Class, String> CLASS_TO_TYPE = new HashMap<Class, String>();
     
-    //geometry type to class map
-    final static Map<String, Class> TYPE_TO_CLASS_MAP = new HashMap<String, Class>() {
-        {
-            put("GEOMETRY", Geometry.class);
-            put("POINT", Point.class);
-            put("LINESTRING", LineString.class);
-            put("POLYGON", Polygon.class);
-            put("MULTIPOINT", MultiPoint.class);
-            put("MULTILINESTRING", MultiLineString.class);
-            put("MULTIPOLYGON", MultiPolygon.class);
-            put("GEOMETRYCOLLECTION", GeometryCollection.class);
-        }
+    static{
+            TYPE_TO_CLASS.put("GEOMETRY", Geometry.class);
+            TYPE_TO_CLASS.put("POINT", Point.class);
+            TYPE_TO_CLASS.put("POINTM", Point.class);
+            TYPE_TO_CLASS.put("LINESTRING", LineString.class);
+            TYPE_TO_CLASS.put("LINESTRINGM", LineString.class);
+            TYPE_TO_CLASS.put("POLYGON", Polygon.class);
+            TYPE_TO_CLASS.put("POLYGONM", Polygon.class);
+            TYPE_TO_CLASS.put("MULTIPOINT", MultiPoint.class);            
+            TYPE_TO_CLASS.put("MULTIPOINTM", MultiPoint.class);
+            TYPE_TO_CLASS.put("MULTILINESTRING", MultiLineString.class);
+            TYPE_TO_CLASS.put("MULTILINESTRINGM", MultiLineString.class);
+            TYPE_TO_CLASS.put("MULTIPOLYGON", MultiPolygon.class);
+            TYPE_TO_CLASS.put("MULTIPOLYGONM", MultiPolygon.class);
+            TYPE_TO_CLASS.put("GEOMETRYCOLLECTION", GeometryCollection.class);
+            TYPE_TO_CLASS.put("GEOMETRYCOLLECTIONM", GeometryCollection.class);
+            TYPE_TO_CLASS.put("GEOGRAPHY", Geometry.class);    
+            
+            CLASS_TO_TYPE.put(Geometry.class, "GEOMETRY");
+            CLASS_TO_TYPE.put(Point.class, "POINT");
+            CLASS_TO_TYPE.put(LineString.class, "LINESTRING");
+            CLASS_TO_TYPE.put(Polygon.class, "POLYGON");
+            CLASS_TO_TYPE.put(MultiPoint.class, "MULTIPOINT");
+            CLASS_TO_TYPE.put(MultiLineString.class, "MULTILINESTRING");
+            CLASS_TO_TYPE.put(MultiPolygon.class, "MULTIPOLYGON");
+            CLASS_TO_TYPE.put(GeometryCollection.class, "GEOMETRYCOLLECTION");
+            CLASS_TO_TYPE.put(LinearRing.class, "LINEARRING");        
     };
-
-    //geometry class to type map
-    final static Map<Class, String> CLASS_TO_TYPE_MAP = new HashMap<Class, String>() {
-        {
-            put(Geometry.class, "GEOMETRY");
-            put(Point.class, "POINT");
-            put(LineString.class, "LINESTRING");
-            put(Polygon.class, "POLYGON");
-            put(MultiPoint.class, "MULTIPOINT");
-            put(MultiLineString.class, "MULTILINESTRING");
-            put(MultiPolygon.class, "MULTIPOLYGON");
-            put(GeometryCollection.class, "GEOMETRYCOLLECTION");
-            put(LinearRing.class, "LINEARRING");
-        }
-    };
-      
     
     boolean functionEncodingEnabled = true;    
     
@@ -134,9 +138,9 @@ public class H2GISDialect extends BasicSQLDialect {
     @Override
     public boolean includeTable(String schemaName, String tableName,
             Connection cx) throws SQLException {
-        if (tableName.equals("geometry_columns")) {
+        if (tableName.equalsIgnoreCase("geometry_columns")) {
             return false;
-        } else if (tableName.startsWith("spatial_ref_sys")) {
+        } else if (tableName.toLowerCase().startsWith("spatial_ref_sys")) {
             return false;
         } 
         return true;
@@ -207,29 +211,16 @@ public class H2GISDialect extends BasicSQLDialect {
     @Override
     public Class<?> getMapping(ResultSet columnMetaData, Connection cx)
             throws SQLException {
-        
         String typeName = columnMetaData.getString("TYPE_NAME");
-        
-        if("uuid".equalsIgnoreCase(typeName)) {
+
+        if ("uuid".equalsIgnoreCase(typeName)) {
             return UUID.class;
         }
-        
-        //Add a function to H2GIS to return the good geometry class
-        String gType = null;
+
         if ("geometry".equalsIgnoreCase(typeName)) {
-            gType = SFSUtilities.getGeometryTypeNameFromCode(columnMetaData.getInt("DATA_TYPE"));
+            return getGeometryClass(columnMetaData, cx);
         } else {
             return null;
-        }       
-        // decode the type into
-        if(gType == null) {
-            return Geometry.class;
-        } else {
-            Class geometryClass = TYPE_TO_CLASS_MAP.get(gType.toUpperCase());
-            if (geometryClass == null) {
-                geometryClass = Geometry.class;
-            }    
-            return geometryClass;
         }
     }   
     
@@ -291,13 +282,14 @@ public class H2GISDialect extends BasicSQLDialect {
     @Override
     public int getGeometryDimension(String schemaName, String tableName, String columnName,
             Connection cx) throws SQLException {
-     // first attempt, try with the geometry metadata
+        //first attempt, try with the geometry metadata
         Statement statement = null;
         ResultSet result = null;
         int dimension = 0;
         try {
-            if (schemaName == null)
-                schemaName = "PUBLIC";    
+            if (schemaName == null){
+                schemaName = "PUBLIC";
+            }
             
             // try geometry_columns
             try {
@@ -488,9 +480,8 @@ public class H2GISDialect extends BasicSQLDialect {
                     .getAttributeDescriptors()) {
                 if (att instanceof GeometryDescriptor) {
                     GeometryDescriptor gd = (GeometryDescriptor) att;
-
                     // lookup or reverse engineer the srid
-                    int srid = -1;
+                    int srid = 0;
                     if (gd.getUserData().get(JDBCDataStore.JDBC_NATIVE_SRID) != null) {
                         srid = (Integer) gd.getUserData().get(
                                 JDBCDataStore.JDBC_NATIVE_SRID);
@@ -498,12 +489,13 @@ public class H2GISDialect extends BasicSQLDialect {
                         try {
                             Integer result = CRS.lookupEpsgCode(gd
                                     .getCoordinateReferenceSystem(), true);
-                            if (result != null)
+                            if (result != null) {
                                 srid = result;
+                            }
                         } catch (Exception e) {
                             LOGGER.log(Level.FINE, "Error looking up the "
                                     + "epsg code for metadata "
-                                    + "insertion, assuming -1", e);
+                                    + "insertion, assuming 0", e);
                         }
                     }
 
@@ -514,22 +506,19 @@ public class H2GISDialect extends BasicSQLDialect {
                     }
 
                     // grab the geometry type
-                    String geomType = CLASS_TO_TYPE_MAP.get(gd.getType().getBinding());
+                    String geomType = CLASS_TO_TYPE.get(gd.getType().getBinding());
                     if (geomType == null) {
                         geomType = "GEOMETRY";
                     }
 
                     String sql = null;
-                    //setup the geometry type
-                    if (dimensions == 3) {
-                        geomType = geomType + "Z";
-                    } else if (dimensions > 3) {
+                    if (dimensions > 3) {
                         throw new IllegalArgumentException("H2GIS only supports geometries with 2 and 3 dimensions, current value: " + dimensions);
                     }
 
                     sql = "ALTER TABLE \"" + schemaName + "\".\"" + tableName + "\" "
                             + "ALTER COLUMN \"" + gd.getLocalName() + "\" "
-                            + "TYPE geometry (" + geomType + ", " + srid + ");";
+                            + "TYPE " + geomType + " check st_srid(\"" + gd.getLocalName() +"\")="+ srid + ";";
 
                     LOGGER.fine(sql);
                     st.execute(sql);
@@ -579,6 +568,7 @@ public class H2GISDialect extends BasicSQLDialect {
             sql.append("ST_GeomFromText('").append(wkt).append("', ").append(srid).append(")");
         }
     }
+    
 
     @Override
     public FilterToSQL createFilterToSQL() {
@@ -628,4 +618,47 @@ public class H2GISDialect extends BasicSQLDialect {
     public int getDefaultVarcharSize(){
         return -1;
     }
+
+    @Override
+    public String[] getDesiredTablesType() {
+        return new String[]{"TABLE", "VIEW", "TABLE LINK", "EXTERNAL"};
+    }
+
+    /**
+     * Return the corresponding Geometry.class
+     *
+     * @param columnMetaData
+     * @param cx
+     * @return
+     */
+    private Class<?> getGeometryClass(ResultSet columnMetaData, Connection cx) throws SQLException {
+
+        StringBuilder sb = new StringBuilder("AND f_geometry_column  = '");
+        sb.append(columnMetaData.getString("COLUMN_NAME"));
+        sb.append("'");
+
+        PreparedStatement ps = SFSUtilities.prepareInformationSchemaStatement(cx, columnMetaData.getString("TABLE_CAT"), columnMetaData.getString("TABLE_SCHEM"), columnMetaData.getString("TABLE_NAME"), "geometry_columns", sb.toString());
+        ResultSet rs = null;
+        try {
+            rs = ps.executeQuery();
+            String gType = null;
+            if (rs.next()) {
+                gType = rs.getString("TYPE");
+            }
+            if (gType == null) {
+                return Geometry.class;
+            } else {
+                Class geometryClass = TYPE_TO_CLASS.get(gType);
+                if (geometryClass == null) {
+                    geometryClass = Geometry.class;
+                }
+                return geometryClass;
+            }
+
+        } finally {
+            dataStore.closeSafe(rs);
+            dataStore.closeSafe(ps);
+        }
+    }
+    
 }
