@@ -51,6 +51,7 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.geotools.data.jdbc.FilterToSQL;
@@ -108,6 +109,7 @@ public class H2GISDialect extends BasicSQLDialect {
     
     boolean functionEncodingEnabled = true;    
     
+    boolean simplifyEnabled = true;
     
     @Override
     public boolean isAggregatedSortSupported(String function) {
@@ -197,11 +199,13 @@ public class H2GISDialect extends BasicSQLDialect {
             Connection cx) throws SQLException, IOException {
         try {
             String envelope = rs.getString(column);
-            if (envelope != null)
+            if (envelope != null){
                 return wKTReader.read(envelope).getEnvelopeInternal();
-            else
+            }
+            else{
                 // empty one
                 return new Envelope();
+            }
         } catch (ParseException e) {
             throw new IOException(
                     "Cannot create the bounding box", e);
@@ -463,6 +467,9 @@ public class H2GISDialect extends BasicSQLDialect {
     /**
      * Creates GEOMETRY_COLUMN registrations and spatial indexes for all
      * geometry columns
+     * @param schemaName
+     * @param featureType
+     * @param cx
      * @throws java.sql.SQLException
      */
     @Override
@@ -632,7 +639,6 @@ public class H2GISDialect extends BasicSQLDialect {
      * @return
      */
     private Class<?> getGeometryClass(ResultSet columnMetaData, Connection cx) throws SQLException {
-
         StringBuilder sb = new StringBuilder("AND f_geometry_column  = '");
         sb.append(columnMetaData.getString("COLUMN_NAME"));
         sb.append("'");
@@ -660,5 +666,51 @@ public class H2GISDialect extends BasicSQLDialect {
             dataStore.closeSafe(ps);
         }
     }
+    
+    public boolean isSimplifyEnabled() {
+        return simplifyEnabled;
+    }
+
+    /**
+     * Enables/disables usage of ST_Simplify geometry wrapping when 
+     * the Query contains a geometry simplification hint
+     * 
+     * @param simplifyEnabled
+     */
+    public void setSimplifyEnabled(boolean simplifyEnabled) {
+        this.simplifyEnabled = simplifyEnabled;
+    }
+    
+    @Override
+    protected void addSupportedHints(Set<Hints.Key> hints) {    
+        if(isSimplifyEnabled()) {
+            hints.add(Hints.GEOMETRY_SIMPLIFICATION);
+        }
+    }    
+    
+    /**
+     * @param functionEncodingEnabled
+     * @see h2GISDataStoreFactory#ENCODE_FUNCTIONS
+     */
+    public void setFunctionEncodingEnabled(boolean functionEncodingEnabled) {
+        this.functionEncodingEnabled = functionEncodingEnabled;
+    }
+
+    @Override
+    public void encodeGeometryColumnSimplified(GeometryDescriptor gatt, String prefix, int srid, StringBuffer sql, Double distance) {
+        if (!isSimplifyEnabled()) {
+            super.encodeGeometryColumnSimplified(gatt, prefix, srid, sql, distance);
+        } else {
+            sql.append("ST_ASBinary(ST_Simplify(");
+            encodeColumnName(prefix, gatt.getLocalName(), sql);
+            sql.append(", ").append(distance).append("))");
+        }
+
+    }
+    
+    
+
+    
+    
     
 }
