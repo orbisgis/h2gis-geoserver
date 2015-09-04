@@ -28,14 +28,50 @@ package org.orbisgis.geoserver.h2gis.datastore;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.geotools.data.jdbc.datasource.ManageableDataSource;
+import org.geotools.factory.Hints;
+import org.geotools.factory.Hints.Key;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.JDBCDataStoreFactory;
+import static org.geotools.jdbc.JDBCDataStoreFactory.DATABASE;
+import static org.geotools.jdbc.JDBCDataStoreFactory.HOST;
+import static org.geotools.jdbc.JDBCDataStoreFactory.PASSWD;
+import static org.geotools.jdbc.JDBCDataStoreFactory.PORT;
+import static org.geotools.jdbc.JDBCDataStoreFactory.USER;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,4 +120,59 @@ public class H2DataStoreFactoryTest  {
             assertTrue(url.contains("MVCC=true"));
         }
     }
+    
+    
+//    public void testSimplifyParameterDisabled() throws Exception {
+//        H2GISDataStoreFactory factory = new H2GISDataStoreFactory();
+//        Properties db = ;
+//        
+//        Map<String, Object> params = new HashMap<String, Object>();
+//        params.put(HOST.key, db.getProperty(HOST.key));
+//        params.put(DATABASE.key, db.getProperty(DATABASE.key));
+//        params.put(PORT.key, db.getProperty(PORT.key));
+//        params.put(USER.key, db.getProperty(USER.key));
+//        params.put(PASSWD.key, db.getProperty(PASSWD.key));
+//        
+//        // force simplify off
+//        params.put(H2GISDataStoreFactory.SIMPLIFY.key, false);
+//        JDBCDataStore store = factory.createDataStore(params);
+//        assertNotNull(store);
+//        try {
+//            // check dialect
+//            H2GISDialect dialect = (H2GISDialect) store.getSQLDialect();
+//            assertFalse(dialect.isSimplifyEnabled());
+//            Set<Hints.Key> baseHints = new HashSet<Key>();
+//            dialect.addSupportedHints(baseHints);
+//            assertTrue(baseHints.isEmpty());
+//        } finally {
+//            store.dispose();
+//        }
+//    }
+//    
+//    public void testSimplifyParameter() throws Exception {
+//        H2GISDataStoreFactory factory = new H2GISDataStoreFactory();
+//        Properties db = fixture;
+//        
+//        Map<String, Object> params = new HashMap<String, Object>();
+//        params.put(HOST.key, db.getProperty(HOST.key));
+//        params.put(DATABASE.key, db.getProperty(DATABASE.key));
+//        params.put(PORT.key, db.getProperty(PORT.key));
+//        params.put(USER.key, db.getProperty(USER.key));
+//        params.put(PASSWD.key, db.getProperty(PASSWD.key));
+//        
+//        // do not specify simplify, on by default
+//        JDBCDataStore store = factory.createDataStore(params);
+//        assertNotNull(store);
+//        try {
+//            // check dialect
+//            H2GISDialect dialect = (H2GISDialect) store.getSQLDialect();
+//            assertTrue(dialect.isSimplifyEnabled());
+//            Set<Hints.Key> baseHints = new HashSet<Key>();
+//            dialect.addSupportedHints(baseHints);
+//            assertFalse(baseHints.isEmpty());
+//            assertTrue(baseHints.contains(Hints.GEOMETRY_SIMPLIFICATION));
+//        } finally {
+//            store.dispose();
+//        }
+//    }
 }

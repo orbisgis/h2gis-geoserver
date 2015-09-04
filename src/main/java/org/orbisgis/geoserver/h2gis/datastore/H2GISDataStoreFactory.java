@@ -36,6 +36,7 @@ import org.geotools.data.jdbc.datasource.DBCPDataSource;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.JDBCDataStoreFactory;
 import org.geotools.jdbc.SQLDialect;
+import org.geotools.util.KVP;
 import org.h2gis.utilities.JDBCUtilities;
 import org.h2gis.h2spatialext.CreateSpatialExtension;
 
@@ -78,8 +79,27 @@ public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
      * optional parameter to handle the next storage engine.
      * @link http://www.h2database.com/html/mvstore.html
      */
-    public static final Param MVSTORE = new Param("MVSTORE", Boolean.class, "MVSTORE", false, Boolean.FALSE);
+    public static final Param MVSTORE = new Param("MVSTORE", Boolean.class, "MVSTORE", false, Boolean.TRUE);
 
+    
+     /**
+     * Enables ST_Simplify function when the queries contain geometry simplification hints
+     */
+    public static final Param SIMPLIFY = new Param("Support on the fly geometry simplification", Boolean.class, 
+            "When enabled, operations such as map rendering will pass a hint that will enable the usage of ST_Simplify", false, Boolean.FALSE);
+    
+   
+    /**
+     * Enables direct encoding of selected filter functions in sql
+     */
+    public static final Param ENCODE_FUNCTIONS = new Param( "encode functions", Boolean.class,
+            "set to true to have a set of filter functions be translated directly in SQL. " +
+            "Due to differences in the type systems the result might not be the same as evaluating " +
+            "them in memory, including the SQL failing with errors while the in memory version works fine. " +
+            "However this allows to push more of the filter into the database, increasing performance." +
+            "the postgis table.", false, false,
+            new KVP( Param.LEVEL, "advanced"));
+    
     /**
      * base location to store h2 database files
      */
@@ -124,6 +144,10 @@ public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
         //add additional parameters
         parameters.put(ASSOCIATIONS.key, ASSOCIATIONS);
         parameters.put(DBTYPE.key, DBTYPE);
+        
+        parameters.put(ENCODE_FUNCTIONS.key, ENCODE_FUNCTIONS);
+        parameters.put(SIMPLIFY.key, SIMPLIFY);
+        
     }
 
     @Override
@@ -221,12 +245,20 @@ public class H2GISDataStoreFactory extends JDBCDataStoreFactory {
     @Override
     protected JDBCDataStore createDataStoreInternal(JDBCDataStore dataStore, Map params)
             throws IOException {
+        
+        H2GISDialect h2GISDialect = (H2GISDialect) dataStore.getSQLDialect();
         //check the foreign keys parameter
-        Boolean foreignKeys = (Boolean) ASSOCIATIONS.lookUp(params);
-
+        Boolean foreignKeys = (Boolean) ASSOCIATIONS.lookUp(params);        
         if (foreignKeys != null) {
-            dataStore.setAssociations(foreignKeys.booleanValue());
-        }
+            dataStore.setAssociations(foreignKeys);
+        }        
+         // check if we can encode functions in sql
+        Boolean encodeFunctions = (Boolean) ENCODE_FUNCTIONS.lookUp(params);
+        h2GISDialect.setFunctionEncodingEnabled(encodeFunctions != null && encodeFunctions);
+        
+        //allow the simplify function
+        Boolean simplify = (Boolean) SIMPLIFY.lookUp(params);
+        h2GISDialect.setSimplifyEnabled(simplify == null || simplify);
 
         return dataStore;
     }
