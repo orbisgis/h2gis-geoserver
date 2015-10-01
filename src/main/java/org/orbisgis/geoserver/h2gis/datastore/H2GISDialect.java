@@ -705,12 +705,6 @@ public class H2GISDialect extends BasicSQLDialect {
             encodeColumnName(prefix, gatt.getLocalName(), sql);
             sql.append(", ").append(distance).append("))");
         }
-
     }
-    
-    
-
-    
-    
     
 }

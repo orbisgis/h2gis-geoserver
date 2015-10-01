@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.orbisgis</groupId>
     <artifactId>h2gis-gs</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>H2GIS-GS</name>
     <description>H2GIS-GS is an extension to connect the spatial extension of the H2 database engine, H2GIS to geoserver.</description>
@@ -44,15 +44,15 @@
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <h2-version>1.4.188</h2-version>
+        <h2-version>1.4.189</h2-version>
         <h2-package>com.h2database</h2-package>
         <org.osgi.compendium-version>4.3.1</org.osgi.compendium-version>
         <jts-version>1.13</jts-version>
         <sl4j-version>1.6.0</sl4j-version>
         <cts-version>1.3.3</cts-version>
         <junit-version>4.11</junit-version>
-        <geoserver-version>2.8-beta</geoserver-version>
-        <geotools-version>14-beta</geotools-version>
+        <geoserver-version>2.8.0</geoserver-version>
+        <geotools-version>14.0</geotools-version>
         <h2gis-version>1.2.3</h2gis-version>
     </properties>
     <developers>        
