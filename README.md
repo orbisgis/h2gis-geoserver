@@ -1,6 +1,6 @@
 # H2GIS-GS
 
-Is an extension to use H2GIS with Geoserver 2.8.X under development.
+Is an extension to use H2GIS with Geoserver at least the 2.8.X series.
 
  
 ### Install
