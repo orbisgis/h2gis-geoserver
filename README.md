@@ -17,7 +17,7 @@ $ mvn clean install
 
 ### Use
 
-Read the step by step tutorial avaible on the [WIKI page] (https://github.com/orbisgis/h2gis-gs/wiki)
+Read the step by step tutorial available on the [WIKI page] (https://github.com/orbisgis/h2gis-gs/wiki)
 
 
 
