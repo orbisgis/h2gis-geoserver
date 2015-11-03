@@ -15,4 +15,10 @@ $ mvn clean install
 * In your target folder, go to plugin-dep that contains all dependencies. Select all jars and copy-paste it to the WEB-INF/lib directory of your GeoServer installation.
 * Restart GeoServer
 
+### Use
+
+Read the step by step tutorial avaible on the [WIKI page] (https://github.com/orbisgis/h2gis-gs/wiki)
+
+
+
 
