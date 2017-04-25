@@ -1,6 +1,8 @@
-# H2GIS-GS
+# H2GIS-Geoserver
 
 Is an extension to use H2GIS with Geoserver at least the 2.8.X series.
+
+Note that H2GIS-Geoserver uses the H2GIS Geotools driver available at https://github.com/orbisgis/h2gis-geotools
 
  
 ### Install
