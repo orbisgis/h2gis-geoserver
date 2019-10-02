@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.h2gis</groupId>
     <artifactId>h2gis-geoserver</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>H2GIS Geoserver datastore</name>
-    <description>H2GIS-Geoserver is an extension to connect the spatial extension of the H2 database engine, H2GIS to geoserver.</description>
+    <description>H2GIS-Geoserver is an extension to connect the spatial extension of the H2 database engine, H2GIS to
+        geoserver.
+    </description>
     <organization>
         <name>Lab-STICC CNRS UMR 6285</name>
         <url>http://www.labsticc.fr/</url>
@@ -35,7 +38,13 @@
             <version>${geoserver-version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
-        </dependency>       
+        </dependency>
+        <dependency>
+            <groupId>org.geoserver.web</groupId>
+            <artifactId>gs-web-core</artifactId>
+            <version>${geoserver-version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -47,66 +56,84 @@
             <artifactId>h2gis-geotools</artifactId>
             <version>${h2gis-geotools-version}</version>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>com.mockrunner</groupId>
             <artifactId>mockrunner</artifactId>
             <scope>test</scope>
-             <version>${mockrunner-version}</version>
+            <version>${mockrunner-version}</version>
         </dependency>
         <dependency>
             <groupId>xmlunit</groupId>
             <artifactId>xmlunit</artifactId>
             <scope>test</scope>
-             <version>${xmlunit-version}</version>
+            <version>${xmlunit-version}</version>
         </dependency>
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <scope>test</scope>
             <version>${easymock-version}</version>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet-api.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <org.osgi.compendium-version>4.3.1</org.osgi.compendium-version>
         <sl4j-version>1.6.0</sl4j-version>
         <junit-version>4.11</junit-version>
-        <geoserver-version>2.8.1</geoserver-version>
-        <h2gis-geotools-version>0.1.0-SNAPSHOT</h2gis-geotools-version>
+        <geoserver-version>2.15.1</geoserver-version>
+        <h2gis-geotools-version>1.5.0-SNAPSHOT</h2gis-geotools-version>
         <mockrunner-version>0.3.6</mockrunner-version>
         <xmlunit-version>1.3</xmlunit-version>
         <easymock-version>2.5.2</easymock-version>
+        <spring.version>5.1.1.RELEASE</spring.version>
+        <servlet-api.version>3.0.1</servlet-api.version>
     </properties>
-     <scm>
-                <connection>scm:git:https://github.com/orbisgis/h2gis-geoserver.git</connection>
-                <developerConnection>scm:git:https://github.com/orbisgis/h2gis-geoserver.git</developerConnection>
-                <url>git@github.com:orbisgis/h2gis-geoserver.git</url>
+    <scm>
+        <connection>scm:git:https://github.com/orbisgis/h2gis-geoserver.git</connection>
+        <developerConnection>scm:git:https://github.com/orbisgis/h2gis-geoserver.git</developerConnection>
+        <url>git@github.com:orbisgis/h2gis-geoserver.git</url>
     </scm>
-    <developers>        
+    <developers>
         <developer>
             <name>Erwan Bocher</name>
             <organization>Lab-STICC CNRS UMR 6285</organization>
         </developer>
     </developers>
-    <repositories>   
-        <repository>
-            <id>OrbisGIS</id>
-            <name>OrbisGIS repository</name>
-            <url>http://repo.orbisgis.org</url>
-        </repository> 
+    <repositories>
         <repository>
             <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
             <url>http://download.osgeo.org/webdav/geotools/</url>
+            <!-- release repository used by geotools (and third-party dependencies) -->
         </repository>
         <repository>
-            <id>geoserver</id>
-            <url>http://repo.opengeo.org/</url>
+            <id>geosolutions</id>
+            <name>geosolutions repository</name>
+            <url>http://maven.geo-solutions.it/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
         </repository>
         <repository>
-            <id>opengeo</id>
-            <name>Boundless Maven Repository</name>
-            <url>http://repo.boundlessgeo.com/main/</url>
+            <id>repo2.maven.org</id>
+            <name>Maven2 repository 2</name>
+            <url>http://repo2.maven.org/maven2</url>
         </repository>
     </repositories>
     <build>
@@ -126,7 +153,7 @@
                 </includes>
             </resource>
         </resources>
-        <plugins>          
+        <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -134,7 +161,7 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
-            </plugin>            
+            </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.6</version>
@@ -158,13 +185,12 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
-                            <transitive>true</transitive>
                             <excludeTransitive>false</excludeTransitive>
                             <stripVersion>true</stripVersion>
                             <includeScope>provided</includeScope>
                             <excludeArtifactIds>slf4j-api</excludeArtifactIds>
                         </configuration>
-                    </execution>                    
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
